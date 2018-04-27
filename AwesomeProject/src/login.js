@@ -5,8 +5,8 @@
  */
 
 import React, { Component } from 'react';
-import App from './App';
-
+import {connect} from 'react-redux';
+import {doLogin} from './actions/Login'
 import {
     StyleSheet,
     Text,
@@ -15,21 +15,39 @@ import {
     Image,
     Button,
 } from "react-native";
+import App from "./App";
 
-import MainPage from './App';
-import LoginPage from './login';
 
-let initialRoute = {
-    name: 'login-page',
-    page: LoginPage,
-}
+class LoginPage extends Component{
 
-export default class Login extends React.Component{
+    shouldComponentUpdate(nextProps,nextState){
+        if (nextProps.status === 'done' && nextProps.isSuccess){
+            this.props.navigator.replace({
+                id : 'App',
+                component: App,
+                passProps:{
+                    user:nextProps.user
+                }
+            });
+            return false;
+        }
+        return true;
+    }
 
-    static navigationOptions = {
-        header : null
-    };
     render(){
+        let tips;
+        if (this.props.status === 'init')
+        {
+            tips = '请点击登录';
+        }
+        else if (this.props.status === 'doing')
+        {
+            tips = '正在登录...';
+        }
+        else if (this.props.status === 'done' && !this.props.isSuccess)
+        {
+            tips = '登录失败, 请重新登录';
+        }
         return (
             <View style = { {backgroundColor:'#f4f4f4',flex:1}}>
                <Image
@@ -51,8 +69,8 @@ export default class Login extends React.Component{
                     secureTextEntry={true}
                     textAlign='center'
                 />
-                <Button style = { styles.button } title="登陆" onPress = {
-                    () => navigate('App')
+                <Button style = { styles.button } title={ tips }
+                        onPress ={ this.handleLogin.bind(this)
                 }/>
                 <View style={{flex:1,flexDirection:'row',alignItems: 'flex-end',bottom:10}}>
                     <Text style={styles.style_view_unlogin}>
@@ -62,11 +80,30 @@ export default class Login extends React.Component{
                         新用户
                     </Text>
                 </View>
-
             </View>
         )
     }
+    /**
+     *  执行登录，使用this.props.dispatch(doLogin())触发action，
+     *  经过reducer处理后，新的状态交还给store，store会通知视图刷新。
+     *  所以shouldComponentUpdate会被调用，然后，
+     *  判断登录成功则切换页面到MainPage（并携带参数user）。
+     */
+    handleLogin(){
+        this.props.dispatch(doLogin());
+    }
 }
+
+//select函数的作用是将store的状态绑定到当前组件的props中。
+function select(store) {
+    return {
+        status: store.loginIn.status,
+        isSuccess: store.loginIn.isSuccess,
+        user: store.loginIn.user
+    }
+}
+//表示LoginPage组件对store的状态感兴趣。
+export default connect(select)(LoginPage);
 
 const styles = StyleSheet.create({
   button_login:{

@@ -8,13 +8,13 @@ import React, { Component } from 'react';
 // 引入react-redux
 import {Provider}from 'react-redux';
 // 引入store文件，下步会创建;
-import Login from './login';
+import App from './container/App';
 import configureStore from './store/config';
 const store = configureStore();
 
 const Root = () => (
     <Provider store={store}>
-        <Login />
+        <App />
     </Provider>
 );
 

@@ -10,7 +10,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {
     StyleSheet,
     Text,
-    ActivityIndicator,
     Image,
     View,
     FlatList,
